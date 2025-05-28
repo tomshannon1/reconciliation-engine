@@ -26,6 +26,149 @@ A powerful and flexible data reconciliation tool that supports multiple data sou
   - Unmatched internal records
   - Unmatched external records
 
+## Architecture
+
+### System Architecture
+```mermaid
+graph TD
+    subgraph "Data Sources"
+        GCS[Google Cloud Storage]
+        S3[Amazon S3]
+        Local[Local Files]
+        BQ[BigQuery]
+        RS[Redshift]
+    end
+
+    subgraph "Reconciliation Engine"
+        Parser[Data Parser]
+        Matcher[Transaction Matcher]
+        Validator[Data Validator]
+    end
+
+    subgraph "Output"
+        MT[Matched Transactions]
+        UI[Unmatched Internal]
+        UE[Unmatched External]
+    end
+
+    GCS --> Parser
+    S3 --> Parser
+    Local --> Parser
+    BQ --> Parser
+    RS --> Parser
+    Parser --> Validator
+    Validator --> Matcher
+    Matcher --> MT
+    Matcher --> UI
+    Matcher --> UE
+
+    style GCS fill:#81C784
+    style S3 fill:#64B5F6
+    style Local fill:#FFB74D
+    style BQ fill:#81C784
+    style RS fill:#64B5F6
+    style Parser fill:#9575CD
+    style Matcher fill:#9575CD
+    style Validator fill:#9575CD
+    style MT fill:#4DB6AC
+    style UI fill:#FF8A65
+    style UE fill:#FF8A65
+```
+
+### Data Flow
+```mermaid
+graph LR
+    subgraph "Input Processing"
+        I1[Read Source 1]
+        I2[Read Source 2]
+        V1[Validate Schema]
+        V2[Validate Schema]
+    end
+
+    subgraph "Transformation"
+        N1[Normalize Data]
+        N2[Normalize Data]
+        K1[Generate Keys]
+        K2[Generate Keys]
+    end
+
+    subgraph "Matching"
+        M1[Match Records]
+        T1[Apply Tolerances]
+        R1[Reconcile]
+    end
+
+    I1 --> V1
+    I2 --> V2
+    V1 --> N1
+    V2 --> N2
+    N1 --> K1
+    N2 --> K2
+    K1 --> M1
+    K2 --> M1
+    M1 --> T1
+    T1 --> R1
+
+    style I1 fill:#81D4FA
+    style I2 fill:#81D4FA
+    style V1 fill:#A5D6A7
+    style V2 fill:#A5D6A7
+    style N1 fill:#FFE082
+    style N2 fill:#FFE082
+    style K1 fill:#CE93D8
+    style K2 fill:#CE93D8
+    style M1 fill:#F48FB1
+    style T1 fill:#F48FB1
+    style R1 fill:#80CBC4
+```
+
+### Component Architecture
+```mermaid
+graph TB
+    subgraph "Core Services"
+        RC[Reconciliation Core]
+        DS[Data Service]
+        MS[Matching Service]
+    end
+
+    subgraph "Data Adapters"
+        FA[File Adapter]
+        SA[S3 Adapter]
+        GA[GCS Adapter]
+        BA[BigQuery Adapter]
+        RA[Redshift Adapter]
+    end
+
+    subgraph "Utilities"
+        Logger
+        Config[Config Manager]
+        Valid[Validator]
+    end
+
+    RC --> DS
+    RC --> MS
+    DS --> FA
+    DS --> SA
+    DS --> GA
+    DS --> BA
+    DS --> RA
+    RC --> Logger
+    RC --> Config
+    RC --> Valid
+
+    style RC fill:#E57373
+    style DS fill:#64B5F6
+    style MS fill:#81C784
+    style FA fill:#FFB74D
+    style SA fill:#FFB74D
+    style GA fill:#FFB74D
+    style BA fill:#FFB74D
+    style RA fill:#FFB74D
+    style Logger fill:#9575CD
+    style Config fill:#9575CD
+    style Valid fill:#9575CD
+```
+
 ## Basic Usage
 
 ### Installation
