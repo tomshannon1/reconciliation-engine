@@ -26,7 +26,9 @@ A powerful and flexible data reconciliation tool that supports multiple data sou
   - Unmatched internal records
   - Unmatched external records
 
-## Installation
+## Basic Usage
+
+### Installation
 
 ```bash
 # Clone the repository
@@ -45,7 +47,7 @@ export AWS_SECRET_ACCESS_KEY=your_secret_key
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json
 ```
 
-## Usage
+### Running the Engine
 
 The reconciliation engine is configured using YAML files. Run it using:
 
@@ -53,7 +55,7 @@ The reconciliation engine is configured using YAML files. Run it using:
 python main.py --config path/to/your/config.yaml
 ```
 
-## Configuration
+## Configuration Examples
 
 ### File-based Configuration Example
 
@@ -151,6 +153,89 @@ sources:
     query: "SELECT * FROM external_transactions"
     connection:
       project_id: "your-gcp-project-id"
+```
+
+## Advanced Usage: Production Pipeline
+
+For production environments, we provide an automated pipeline example using Airflow and dbt. This setup includes:
+
+### Features
+- Automated data ingestion from GCS to BigQuery
+- dbt transformations for data cleaning
+- Partitioned output tables
+- Automated testing and validation
+
+### Project Structure
+```
+reconciliation-engine/
+├── airflow/
+│   └── dags/
+│       └── reconciliation_pipeline.py
+├── dbt/
+│   ├── models/
+│   │   ├── staging/
+│   │   │   ├── stg_stripe_transactions.sql
+│   │   │   └── stg_bank_transactions.sql
+│   │   └── marts/
+│   │       └── fct_reconciled_transactions.sql
+│   ├── dbt_project.yml
+│   └── schema.yml
+└── scripts/
+    ├── generate_test_data.py
+    └── local_pipeline.py
+```
+
+### Pipeline Setup
+
+1. **Configure Environment**
+   ```bash
+   # Copy example environment file and edit with your settings
+   cp .env.example .env
+
+   # Required environment variables:
+   # - GOOGLE_CLOUD_PROJECT
+   # - GOOGLE_APPLICATION_CREDENTIALS
+   # - AIRFLOW_HOME
+   ```
+
+2. **Initialize dbt**
+   ```bash
+   # Verify connection
+   dbt debug
+   
+   # Run models
+   dbt run
+   
+   # Run tests
+   dbt test
+   ```
+
+3. **Set up Airflow**
+   ```bash
+   # Initialize Airflow database
+   airflow db init
+
+   # Create admin user
+   airflow users create \
+       --username admin \
+       --firstname YourName \
+       --lastname YourLastName \
+       --role Admin \
+       --email your@email.com
+
+   # Start services
+   airflow webserver --port 8080  # In one terminal
+   airflow scheduler              # In another terminal
+   ```
+
+### Example Pipeline Output
+```
+Reconciliation Summary:
+match_status      count  percentage
+MATCHED            850      85.00
+AMOUNT_VARIANCE     50       5.00
+UNMATCHED_STRIPE    50       5.00
+UNMATCHED_BANK      50       5.00
 ```
 
 ## Configuration Details
