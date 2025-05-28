@@ -1,0 +1,74 @@
+version: 2
+
+sources:
+  - name: raw
+    database: your-project-id
+    schema: raw
+    tables:
+      - name: stripe_transactions
+        columns:
+          - name: transaction_id
+            tests:
+              - unique
+              - not_null
+          - name: date
+            tests:
+              - not_null
+          - name: customer_id
+            tests:
+              - not_null
+          - name: location_id
+            tests:
+              - not_null
+          - name: amount
+            tests:
+              - not_null
+          - name: fee
+            tests:
+              - not_null
+
+      - name: bank_transactions
+        columns:
+          - name: transaction_id
+            tests:
+              - unique
+              - not_null
+          - name: date
+            tests:
+              - not_null
+          - name: customer_id
+            tests:
+              - not_null
+          - name: location_id
+            tests:
+              - not_null
+          - name: amount
+            tests:
+              - not_null
+
+models:
+  - name: fct_reconciled_transactions
+    description: "Reconciled transactions between Stripe and bank data"
+    columns:
+      - name: stripe_transaction_id
+        description: "Unique identifier for Stripe transactions"
+      - name: bank_transaction_id
+        description: "Unique identifier for bank transactions"
+      - name: transaction_date
+        description: "Date of the transaction"
+        tests:
+          - not_null
+      - name: customer_id
+        description: "Customer identifier"
+        tests:
+          - not_null
+      - name: location_id
+        description: "Location identifier"
+        tests:
+          - not_null
+      - name: match_status
+        description: "Status of the reconciliation match"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['MATCHED', 'AMOUNT_VARIANCE', 'UNMATCHED_STRIPE', 'UNMATCHED_BANK'] 
