@@ -1,12 +1,13 @@
 import argparse
 import yaml
-import dask.dataframe as dd
 import logging
+import dask.dataframe as dd
 import os
 from urllib.parse import urlparse
 from botocore.exceptions import ClientError, NoCredentialsError
 from google.auth.exceptions import DefaultCredentialsError
 from src.recon_engine import ReconciliationEngine
+from src.db_loader import get_loader
 
 # Set up logging
 logging.basicConfig(
@@ -18,6 +19,32 @@ logger = logging.getLogger(__name__)
 def load_config(path):
     with open(path, 'r') as file:
         return yaml.safe_load(file)
+
+def load_source(source_config):
+    """
+    Load data from either a file or database source based on configuration.
+    
+    source_config format:
+    {
+        "type": "file|bigquery|redshift",
+        "path": "path/to/file.csv",  # for file type
+        "query": "SELECT * FROM table",  # for database types
+        "connection": {  # for database types
+            "project_id": "...",  # for BigQuery
+            "host": "...",        # for Redshift
+            "database": "...",    # for Redshift
+            "user": "...",        # for Redshift
+            "password": "...",    # for Redshift
+            "port": 5439,         # optional for Redshift
+            "schema": "public"    # optional for Redshift
+        }
+    }
+    """
+    if source_config["type"] == "file":
+        return load_csv(source_config["path"])
+    else:
+        loader = get_loader(source_config["type"], **source_config["connection"])
+        return loader.load_table(source_config["query"])
 
 def load_csv(path):
     """
@@ -82,26 +109,15 @@ def load_csv(path):
         raise
 
 def main():
-    parser = argparse.ArgumentParser(description="Run reconciliation between internal and external CSV/PSV files from local, S3, or GCS storage.")
+    parser = argparse.ArgumentParser(description="Run reconciliation between internal and external sources (files or databases).")
     parser.add_argument("--config", type=str, default="examples/config.yaml", help="Path to config YAML file")
-    parser.add_argument(
-        "--internal",
-        type=str,
-        default="data/internal_transactions.csv",
-        help="Path to internal transaction file. Supports local paths, s3://, and gs:// URLs. Accepts CSV/PSV formats."
-    )
-    parser.add_argument(
-        "--external",
-        type=str,
-        default="data/external_transactions.csv",
-        help="Path to external transaction file. Supports local paths, s3://, and gs:// URLs. Accepts CSV/PSV formats."
-    )
-
+    
     args = parser.parse_args()
     config = load_config(args.config)
 
-    internal_df = load_csv(args.internal)
-    external_df = load_csv(args.external)
+    # Load data from sources specified in config
+    internal_df = load_source(config["sources"]["internal"])
+    external_df = load_source(config["sources"]["external"])
 
     engine = ReconciliationEngine(
         match_on=config["matching"]["match_on"],

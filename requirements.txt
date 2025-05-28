@@ -5,4 +5,9 @@ s3fs>=2023.3.0
 gcsfs>=2023.3.0
 boto3>=1.26.0
 google-auth>=2.22.0
+google-cloud-bigquery>=3.14.0
+dask-bigquery>=2023.3.0
+psycopg2-binary>=2.9.0
+redshift_connector>=2.0.0
+sqlalchemy>=2.0.0
 pytest==8.0.0

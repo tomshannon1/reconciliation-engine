@@ -1,0 +1,57 @@
+sources:
+  internal:
+    type: "bigquery"
+    query: |
+      SELECT
+        date,
+        customer_id,
+        location_id,
+        amount
+      FROM `project.dataset.internal_transactions`
+      WHERE date >= '2024-01-01'
+    connection:
+      project_id: "your-gcp-project-id"
+
+  external:
+    type: "redshift"
+    query: |
+      SELECT
+        date,
+        customer_id,
+        location_id,
+        net_amount
+      FROM external_transactions
+      WHERE date >= '2024-01-01'
+    connection:
+      host: "your-redshift-cluster.region.redshift.amazonaws.com"
+      database: "your_database"
+      user: "your_user"
+      password: "your_password"
+      port: 5439
+      schema: "public"
+
+matching:
+  match_on: ["date", "customer_id", "location_id"]
+  internal_key: "amount"
+  external_key: "net_amount"
+
+tolerances:
+  amount: 0.01
+  days: 1
+
+output:
+  path: "reconciliation_results"
+  reconciled_file: "matched.csv"
+  unmatched_internal_file: "unmatched_internal.csv"
+  unmatched_external_file: "unmatched_external.csv"
+
+# Example mixed source configuration:
+# sources:
+#   internal:
+#     type: "file"
+#     path: "s3://my-bucket/internal/transactions.csv"
+#   external:
+#     type: "bigquery"
+#     query: "SELECT * FROM external_transactions"
+#     connection:
+#       project_id: "your-gcp-project-id" 
