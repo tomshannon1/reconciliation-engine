@@ -1,0 +1,20 @@
+matching:
+  match_on: ["date", "reference_id"]  # Fields to match on
+  internal_key: "amount"              # Amount field in internal data
+  external_key: "net_amount"          # Amount field in external data
+
+tolerances:
+  amount: 0.01  # Allow 0.01 difference in amounts
+  days: 1       # Allow 1 day difference in dates
+
+output:
+  path: "s3://my-bucket/reconciliation-results"  # Example S3 output path
+  reconciled_file: "matched.csv"
+  unmatched_internal_file: "unmatched_internal.csv"
+  unmatched_external_file: "unmatched_external.csv"
+
+# Example usage:
+# python main.py \
+#   --internal s3://my-bucket/internal/transactions.csv \
+#   --external gs://my-other-bucket/external/transactions.psv \
+#   --config examples/cloud_config.yaml 
