@@ -209,10 +209,10 @@ Your data sources must include these fields (column names can be configured):
 
 ```bash
 # Run tests
-pytest tests/
+python3 -m pytest tests/
 
 # Run specific test file
-pytest tests/test_recon_engine.py
+python3 -m pytest tests/test_recon_engine.py
 ```
 
 ## Error Handling
