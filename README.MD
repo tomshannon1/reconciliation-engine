@@ -41,6 +41,25 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## 🎯 CLI Usage
+
+Run the reconciliation engine with specific configuration and data files:
+
+```bash
+python cli.py --config config.yaml --internal data/internal_transactions.csv --external data/external_transactions.csv
+```
+
+## Testing
+To run the tests, run the following command from the root directory:
+```bash
+python3 -m tests.test_recon_engine
+```
+
+### Parameters:
+- `--config`: Path to the YAML configuration file
+- `--internal`: Path to the internal transactions CSV file
+- `--external`: Path to the external transactions CSV file
+
 ## 🐳 Run with Docker
 
 To run the project using Docker:
@@ -51,7 +70,7 @@ docker run --rm -v $(pwd)/data:/app/data -v $(pwd)/outputs:/app/outputs recon-en
 ```
 
 > 💡 Ensure the `data/` directory contains `internal_transactions.csv` and `external_transactions.csv`.
-> The `outputs/` directory will be created if it doesn’t exist and will contain the resulting CSV reports.
+> The `outputs/` directory will be created if it doesn't exist and will contain the resulting CSV reports.
 
 ## 📂 Folder Structure
 
