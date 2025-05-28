@@ -2,13 +2,15 @@ import pytest
 import os
 import logging
 import yaml
-from main import load_csv, load_config
+from src.source_loader import SourceLoader
+from src.config_validator import ConfigValidator
 from botocore.exceptions import NoCredentialsError
 from google.auth.exceptions import DefaultCredentialsError
 
 def test_load_csv_local_csv(sample_csv_data):
     """Test loading a local CSV file."""
-    df = load_csv(sample_csv_data)
+    source_config = {"type": "file", "path": sample_csv_data}
+    df = SourceLoader.load_source(source_config)
     result = df.compute()
     assert len(result) == 2
     assert list(result.columns) == ['date', 'customer_id', 'location_id', 'amount']
@@ -16,7 +18,8 @@ def test_load_csv_local_csv(sample_csv_data):
 
 def test_load_csv_local_psv(sample_psv_data):
     """Test loading a local PSV file."""
-    df = load_csv(sample_psv_data)
+    source_config = {"type": "file", "path": sample_psv_data}
+    df = SourceLoader.load_source(source_config)
     result = df.compute()
     assert len(result) == 2
     assert list(result.columns) == ['date', 'customer_id', 'location_id', 'amount']
@@ -24,12 +27,14 @@ def test_load_csv_local_psv(sample_psv_data):
 
 def test_load_csv_file_not_found():
     """Test handling of non-existent file."""
+    source_config = {"type": "file", "path": "nonexistent_file.csv"}
     with pytest.raises(FileNotFoundError):
-        load_csv("nonexistent_file.csv")
+        SourceLoader.load_source(source_config)
 
 def test_load_csv_s3(mock_s3_file):
     """Test loading a file from S3."""
-    df = load_csv(mock_s3_file)
+    source_config = {"type": "file", "path": mock_s3_file}
+    df = SourceLoader.load_source(source_config)
     result = df.compute()
     assert len(result) == 1
     assert 'date' in result.columns
@@ -42,12 +47,13 @@ def test_load_csv_s3_no_credentials(monkeypatch):
     
     monkeypatch.setattr("s3fs.S3FileSystem.__init__", mock_s3fs_init)
     
+    source_config = {"type": "file", "path": "s3://bucket/file.csv"}
     with pytest.raises(NoCredentialsError):
-        load_csv("s3://bucket/file.csv")
+        SourceLoader.load_source(source_config)
 
 def test_load_config_valid(sample_config_file):
     """Test loading a valid config file."""
-    config = load_config(sample_config_file)
+    config = ConfigValidator.load_and_validate(sample_config_file)
     assert config["matching"]["match_on"] == ["date", "customer_id", "location_id"]
     assert config["tolerances"]["amount"] == 0.01
     assert config["tolerances"]["days"] == 1
@@ -56,7 +62,7 @@ def test_load_config_valid(sample_config_file):
 def test_load_config_file_not_found():
     """Test handling of non-existent config file."""
     with pytest.raises(FileNotFoundError):
-        load_config("nonexistent_config.yaml")
+        ConfigValidator.load_and_validate("nonexistent_config.yaml")
 
 def test_load_config_invalid_yaml(tmp_path):
     """Test handling of invalid YAML file."""
@@ -64,7 +70,7 @@ def test_load_config_invalid_yaml(tmp_path):
     invalid_yaml.write_text("invalid: yaml: content: [")
     
     with pytest.raises(yaml.YAMLError):
-        load_config(str(invalid_yaml))
+        ConfigValidator.load_and_validate(str(invalid_yaml))
 
 def test_load_config_missing_required_fields(tmp_path):
     """Test handling of config file with missing required fields."""
@@ -74,16 +80,15 @@ def test_load_config_missing_required_fields(tmp_path):
       internal_key: amount
     """)
     
-    with pytest.raises(KeyError):
-        config = load_config(str(incomplete_config))
-        # Access required fields to trigger validation
-        _ = config["matching"]["match_on"]
+    with pytest.raises(ValueError):
+        ConfigValidator.load_and_validate(str(incomplete_config))
 
 def test_logging_configuration(caplog):
     """Test that logging is properly configured."""
     with caplog.at_level(logging.INFO):
         try:
-            load_csv("nonexistent_file.csv")
+            source_config = {"type": "file", "path": "nonexistent_file.csv"}
+            SourceLoader.load_source(source_config)
         except FileNotFoundError:
             pass
     
@@ -94,7 +99,8 @@ def test_logging_configuration(caplog):
 
 def test_load_csv_gcs(mock_gcs_file):
     """Test loading a file from GCS."""
-    df = load_csv(mock_gcs_file)
+    source_config = {"type": "file", "path": mock_gcs_file}
+    df = SourceLoader.load_source(source_config)
     result = df.compute()
     assert len(result) == 1
     assert 'date' in result.columns
@@ -107,8 +113,9 @@ def test_load_csv_gcs_no_credentials(monkeypatch):
     
     monkeypatch.setattr("gcsfs.GCSFileSystem.__init__", mock_gcsfs_init)
     
+    source_config = {"type": "file", "path": "gs://bucket/file.csv"}
     with pytest.raises(DefaultCredentialsError):
-        load_csv("gs://bucket/file.csv")
+        SourceLoader.load_source(source_config)
 
 def test_load_csv_gcs_file_not_found(monkeypatch):
     """Test handling of non-existent GCS file."""
@@ -118,5 +125,6 @@ def test_load_csv_gcs_file_not_found(monkeypatch):
     
     monkeypatch.setattr("gcsfs.GCSFileSystem", MockGCSFileSystem)
     
+    source_config = {"type": "file", "path": "gs://bucket/nonexistent.csv"}
     with pytest.raises(FileNotFoundError):
-        load_csv("gs://bucket/nonexistent.csv") 
+        SourceLoader.load_source(source_config) 

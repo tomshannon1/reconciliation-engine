@@ -57,6 +57,16 @@ def sample_psv_data():
 def sample_config_file():
     """Create a temporary config file."""
     config_data = {
+        "sources": {
+            "internal": {
+                "type": "file",
+                "path": "data/internal_transactions.csv"
+            },
+            "external": {
+                "type": "file",
+                "path": "data/external_transactions.csv"
+            }
+        },
         "matching": {
             "match_on": ["date", "customer_id", "location_id"],
             "internal_key": "amount",

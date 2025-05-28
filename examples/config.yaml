@@ -1,19 +1,32 @@
-# Configuration for Reconciliation Engine
+# Example configuration file for the reconciliation engine
+sources:
+  internal:
+    type: "file"
+    path: "data/internal_transactions.csv"  # Local file example
+    # Alternative examples:
+    # path: "s3://my-bucket/internal.csv"  # S3 file
+    # path: "gs://my-bucket/internal.psv"  # GCS file (pipe-separated)
+  
+  external:
+    type: "file"
+    path: "data/external_transactions.csv"
+    # Alternative database source example:
+    # type: "bigquery"
+    # query: "SELECT * FROM transactions WHERE date >= '2024-01-01'"
+    # connection:
+    #   project_id: "your-gcp-project"
 
 matching:
+  match_on: ["date", "customer_id", "location_id"]
   internal_key: "amount"
   external_key: "net_amount"
-  match_on:
-    - "date"
-    - "customer_id"
-    - "location_id"
 
 tolerances:
-  amount: 0.05    # dollar tolerance
-  days: 1         # date tolerance in days
+  amount: 0.01  # Allow $0.01 difference in amounts
+  days: 1       # Allow 1 day difference in dates
 
 output:
   path: "outputs"
-  reconciled_file: "reconciled.csv"
+  reconciled_file: "matched.csv"
   unmatched_internal_file: "unmatched_internal.csv"
   unmatched_external_file: "unmatched_external.csv"
