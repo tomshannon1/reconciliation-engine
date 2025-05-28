@@ -1,6 +1,6 @@
 # Reconciliation Engine
 
-A powerful and flexible data reconciliation tool that supports multiple data sources including files (CSV, PSV) and databases (BigQuery, Redshift). The engine helps you match and reconcile transactions between different sources, with support for amount and date tolerances.
+A powerful and flexible data reconciliation tool that supports multiple data sources including files (CSV, PSV), databases (BigQuery, Redshift). Streaming sources, like Kafka are in testing! The engine helps you match and reconcile transactions between different sources, with support for amount and date tolerances.
 
 ## Features
 
@@ -25,6 +25,13 @@ A powerful and flexible data reconciliation tool that supports multiple data sou
   - Matched records
   - Unmatched internal records
   - Unmatched external records
+
+- **Streaming Support**:
+  - Kafka source integration
+  - Real-time reconciliation
+  - Windowed processing
+  - Late arrival handling
+  - Metrics tracking
 
 ## Architecture
 
@@ -298,88 +305,145 @@ sources:
       project_id: "your-gcp-project-id"
 ```
 
-## Advanced Usage: Production Pipeline
+### Streaming Configuration Example
 
-For production environments, we provide an automated pipeline example using Airflow and dbt. This setup includes:
+```yaml
+sources:
+  internal:
+    type: "kafka"
+    connection:
+      bootstrap_servers: "localhost:9092"
+      security:
+        sasl_mechanism: "PLAIN"
+        security_protocol: "SASL_SSL"
+        username: "your_username"
+        password: "your_password"
+    topic: "internal_transactions"
+    group_id: "recon_internal"
+    
+  external:
+    type: "kafka"
+    connection:
+      bootstrap_servers: "kafka-cluster:9092"
+    topic: "external_transactions"
+    group_id: "recon_external"
+
+window:
+  type: "tumbling"    # or "sliding"
+  size: "1h"         # window size
+  grace: "10m"       # late arrival grace period
+
+state:
+  storage_path: "data/stream_state"
+  max_windows: 100   # maximum windows to keep in memory
+
+matching:
+  match_on: ["date", "customer_id", "location_id"]
+  internal_key: "amount"
+  external_key: "net_amount"
+  tolerances:
+    amount: 0.01
+    days: 1
+
+output:
+  path: "reconciliation_results"
+  reconciled_file: "matched.csv"
+  unmatched_internal_file: "unmatched_internal.csv"
+  unmatched_external_file: "unmatched_external.csv"
+```
+
+## Streaming Support
+
+The reconciliation engine supports real-time streaming from Kafka sources, enabling continuous reconciliation of transactions as they arrive.
 
 ### Features
-- Automated data ingestion from GCS to BigQuery
-- dbt transformations for data cleaning
-- Partitioned output tables
-- Automated testing and validation
 
-### Project Structure
-```
-reconciliation-engine/
-├── airflow/
-│   └── dags/
-│       └── reconciliation_pipeline.py
-├── dbt/
-│   ├── models/
-│   │   ├── staging/
-│   │   │   ├── stg_stripe_transactions.sql
-│   │   │   └── stg_bank_transactions.sql
-│   │   └── marts/
-│   │       └── fct_reconciled_transactions.sql
-│   ├── dbt_project.yml
-│   └── schema.yml
-└── scripts/
-    ├── generate_test_data.py
-    └── local_pipeline.py
-```
+- **Windowed Processing**:
+  - Tumbling windows: Fixed-size, non-overlapping time windows
+  - Sliding windows: Overlapping windows that slide by a fixed duration
+  - Configurable window sizes and grace periods for late arrivals
 
-### Pipeline Setup
+- **State Management**:
+  - In-memory buffering of window data
+  - Persistent storage for window state
+  - Automatic cleanup of processed windows
 
-1. **Configure Environment**
+- **Metrics and Monitoring**:
+  - Consumer lag tracking
+  - Processing time metrics
+  - Match rate statistics
+  - Window-level and overall metrics
+
+### Running with Streaming Sources
+
+1. **Configure Kafka Connection**:
    ```bash
-   # Copy example environment file and edit with your settings
-   cp .env.example .env
-
-   # Required environment variables:
-   # - GOOGLE_CLOUD_PROJECT
-   # - GOOGLE_APPLICATION_CREDENTIALS
-   # - AIRFLOW_HOME
+   # Set up Kafka credentials if needed
+   export KAFKA_USERNAME=your_username
+   export KAFKA_PASSWORD=your_password
    ```
 
-2. **Initialize dbt**
+2. **Start the Streaming Reconciliation**:
    ```bash
-   # Verify connection
-   dbt debug
+   python main.py --config path/to/streaming_config.yaml
+   ```
+
+3. **Monitor Progress**:
+   ```bash
+   # View real-time metrics
+   curl http://localhost:8080/metrics
    
-   # Run models
-   dbt run
-   
-   # Run tests
-   dbt test
+   # Check consumer lag
+   kafka-consumer-groups.sh --bootstrap-server localhost:9092 \
+       --describe --group recon_internal
    ```
 
-3. **Set up Airflow**
-   ```bash
-   # Initialize Airflow database
-   airflow db init
+### Window Types
 
-   # Create admin user
-   airflow users create \
-       --username admin \
-       --firstname YourName \
-       --lastname YourLastName \
-       --role Admin \
-       --email your@email.com
-
-   # Start services
-   airflow webserver --port 8080  # In one terminal
-   airflow scheduler              # In another terminal
+1. **Tumbling Windows**:
+   - Fixed-size, non-overlapping windows
+   - Example: Hourly reconciliation windows
+   ```yaml
+   window:
+     type: "tumbling"
+     size: "1h"
    ```
 
-### Example Pipeline Output
+2. **Sliding Windows**:
+   - Overlapping windows that move continuously
+   - Example: Last 24 hours, updated hourly
+   ```yaml
+   window:
+     type: "sliding"
+     size: "24h"
+     slide: "1h"
+   ```
+
+### Handling Late Data
+
+The engine supports late-arriving data through configurable grace periods:
+
+```yaml
+window:
+  type: "tumbling"
+  size: "1h"
+  grace: "10m"  # Accept data up to 10 minutes late
 ```
-Reconciliation Summary:
-match_status      count  percentage
-MATCHED            850      85.00
-AMOUNT_VARIANCE     50       5.00
-UNMATCHED_STRIPE    50       5.00
-UNMATCHED_BANK      50       5.00
-```
+
+### Metrics
+
+Available metrics include:
+
+- Records processed per window
+- Match rates and counts
+- Processing time statistics
+- Consumer lag by partition
+- Window completion status
+
+Access metrics through:
+- HTTP endpoint: `http://localhost:8080/metrics`
+- Logs: Check `logs/streaming.log`
+- Prometheus integration (if configured)
 
 ## Configuration Details
 
