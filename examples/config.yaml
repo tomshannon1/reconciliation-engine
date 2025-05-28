@@ -22,8 +22,8 @@ matching:
   external_key: "net_amount"
 
 tolerances:
-  amount: 0.01  # Allow $0.01 difference in amounts
-  days: 1       # Allow 1 day difference in dates
+  amount: 0.05  # Allow $0.01 difference in amounts
+  days: 0       # Allow 1 day difference in dates
 
 output:
   path: "outputs"
