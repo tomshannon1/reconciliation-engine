@@ -1,0 +1,11 @@
+internal_tx_id,amount,date,customer_id,external_tx_id,gross_amount,fee,net_amount,description,_merge
+,,2024-08-03,,EXT_TX_002,91.74,1.87,89.87,Payment from CUST_005,right_only
+,,2024-08-01,,EXT_TX_004,106.17,9.3,96.87,Payment from CUST_005,right_only
+,,2024-08-03,,EXT_TX_001,119.97,9.61,110.36,Payment from CUST_001,right_only
+,,2024-08-06,,EXT_TX_006,136.53,1.63,134.9,Payment from CUST_002,right_only
+,,2024-08-04,,EXT_TX_003,169.03,1.39,167.64,Payment from CUST_005,right_only
+,,2024-08-03,,EXT_TX_005,181.93,6.66,175.27,Payment from CUST_005,right_only
+,,2024-08-03,,EXT_TX_009,216.58,2.89,213.69,Payment from CUST_001,right_only
+,,2024-08-03,,EXT_TX_008,221.06,5.08,215.98,Payment from CUST_002,right_only
+,,2024-08-06,,EXT_TX_010,324.11,2.54,321.57,Payment from CUST_002,right_only
+,,2024-08-02,,EXT_TX_007,397.88,9.87,388.01,Payment from CUST_001,right_only

@@ -1,0 +1,13 @@
+# Configuration for Reconciliation Engine
+
+matching:
+  internal_key: "amount"
+  external_key: "net_amount"
+  match_on:
+    - "date"
+
+output:
+  path: "outputs"
+  reconciled_file: "reconciled.csv"
+  unmatched_internal_file: "unmatched_internal.csv"
+  unmatched_external_file: "unmatched_external.csv"

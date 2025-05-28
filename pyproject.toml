@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "recon_engine"
+version = "0.1.0"
+description = "Automated reconciliation engine for comparing internal vs external financial transaction data."
+authors = [
+    { name="Tom Shannon", email="tom.patrick.shannon@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2.2"
+]
