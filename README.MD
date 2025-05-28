@@ -52,7 +52,7 @@ python cli.py --config config.yaml --internal data/internal_transactions.csv --e
 ## Testing
 To run the tests, run the following command from the root directory:
 ```bash
-python3 -m tests.test_recon_engine
+python3 -m pytest
 ```
 
 ### Parameters:

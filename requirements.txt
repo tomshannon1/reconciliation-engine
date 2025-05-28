@@ -1,2 +1,3 @@
 pandas==2.2.2
 dask[dataframe]==2024.4.1
+pytest==8.0.0
