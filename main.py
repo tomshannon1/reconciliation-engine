@@ -14,7 +14,7 @@ def load_csv(path):
 
 def main():
     parser = argparse.ArgumentParser(description="Run reconciliation between internal and external CSV files.")
-    parser.add_argument("--config", type=str, default="config.yaml", help="Path to config YAML file")
+    parser.add_argument("--config", type=str, default="examples/config.yaml", help="Path to config YAML file")
     parser.add_argument("--internal", type=str, default="data/internal_transactions.csv", help="Path to internal transaction CSV/PSV file")
     parser.add_argument("--external", type=str, default="data/external_transactions.csv", help="Path to external transaction CSV/PSV file")
 
