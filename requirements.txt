@@ -31,3 +31,6 @@ dask-bigquery>=2023.3.0
 psycopg2-binary>=2.9.0
 redshift_connector>=2.0.0
 sqlalchemy>=2.0.0
+confluent-kafka>=2.3.0
+aiokafka>=0.10.0
+kafka-python>=2.0.2
