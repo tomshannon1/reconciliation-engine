@@ -62,17 +62,17 @@ graph TD
     Matcher --> UI
     Matcher --> UE
 
-    style GCS fill:#81C784
-    style S3 fill:#64B5F6
-    style Local fill:#FFB74D
-    style BQ fill:#81C784
-    style RS fill:#64B5F6
-    style Parser fill:#9575CD
-    style Matcher fill:#9575CD
-    style Validator fill:#9575CD
-    style MT fill:#4DB6AC
-    style UI fill:#FF8A65
-    style UE fill:#FF8A65
+    style GCS fill:#C8E6C9
+    style S3 fill:#BBDEFB
+    style Local fill:#FFE0B2
+    style BQ fill:#C8E6C9
+    style RS fill:#BBDEFB
+    style Parser fill:#E1BEE7
+    style Matcher fill:#E1BEE7
+    style Validator fill:#E1BEE7
+    style MT fill:#B2DFDB
+    style UI fill:#FFCCBC
+    style UE fill:#FFCCBC
 ```
 
 ### Data Flow
@@ -109,17 +109,17 @@ graph LR
     M1 --> T1
     T1 --> R1
 
-    style I1 fill:#81D4FA
-    style I2 fill:#81D4FA
-    style V1 fill:#A5D6A7
-    style V2 fill:#A5D6A7
-    style N1 fill:#FFE082
-    style N2 fill:#FFE082
-    style K1 fill:#CE93D8
-    style K2 fill:#CE93D8
-    style M1 fill:#F48FB1
-    style T1 fill:#F48FB1
-    style R1 fill:#80CBC4
+    style I1 fill:#E1F5FE
+    style I2 fill:#E1F5FE
+    style V1 fill:#E8F5E9
+    style V2 fill:#E8F5E9
+    style N1 fill:#FFF8E1
+    style N2 fill:#FFF8E1
+    style K1 fill:#F3E5F5
+    style K2 fill:#F3E5F5
+    style M1 fill:#FCE4EC
+    style T1 fill:#FCE4EC
+    style R1 fill:#E0F2F1
 ```
 
 ### Component Architecture
@@ -156,17 +156,17 @@ graph TB
     RC --> Config
     RC --> Valid
 
-    style RC fill:#E57373
-    style DS fill:#64B5F6
-    style MS fill:#81C784
-    style FA fill:#FFB74D
-    style SA fill:#FFB74D
-    style GA fill:#FFB74D
-    style BA fill:#FFB74D
-    style RA fill:#FFB74D
-    style Logger fill:#9575CD
-    style Config fill:#9575CD
-    style Valid fill:#9575CD
+    style RC fill:#FFCDD2
+    style DS fill:#E3F2FD
+    style MS fill:#E8F5E9
+    style FA fill:#FFE0B2
+    style SA fill:#FFE0B2
+    style GA fill:#FFE0B2
+    style BA fill:#FFE0B2
+    style RA fill:#FFE0B2
+    style Logger fill:#F3E5F5
+    style Config fill:#F3E5F5
+    style Valid fill:#F3E5F5
 ```
 
 ## Basic Usage
